@@ -12,8 +12,12 @@ class PlayerPage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
+          // page app bar
           CustomAppBar(),
+          // disc image and song duration
           _DiscInfo(),
+          // song title and artist + play/pause button
+          DiscTitle(),
         ],
       ),
     );
@@ -34,8 +38,49 @@ class _DiscInfo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           DiscImage(),
-          // TODO: Disc duration widget
-          DiscProgressBar()
+          DiscProgressBar(),
+        ],
+      ),
+    );
+  }
+}
+
+class DiscTitle extends StatelessWidget {
+  const DiscTitle({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 50),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // song title and artist
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // title
+              Text(
+                'RENTAL',
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headline4,
+              ),
+              // artist
+              Text(
+                'BROCKHAMPTON',
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headline5,
+              )
+            ],
+          ),
+          // play button
+          FloatingActionButton(
+            backgroundColor: Theme.of(context).accentColor,
+            child: Icon(Icons.play_arrow),
+            onPressed: () {},
+          ),
         ],
       ),
     );
@@ -52,15 +97,18 @@ class DiscProgressBar extends StatelessWidget {
     return Container(
       child: Column(
         children: [
+          // total song duration text
           Text('2:50'),
           SizedBox(height: 15.0),
           Stack(
             children: [
+              // back line of total time
               Container(
                 height: 180.0,
                 width: 2.0,
                 color: Colors.white.withOpacity(0.1),
               ),
+              // top line with current song part
               Positioned(
                 bottom: 0,
                 child: Container(
@@ -72,6 +120,7 @@ class DiscProgressBar extends StatelessWidget {
             ],
           ),
           SizedBox(height: 15.0),
+          // current song time text
           Text('1:06'),
         ],
       ),
@@ -95,7 +144,9 @@ class DiscImage extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // actual album cover
             Image.asset('assets/saturation.jpg'),
+            // transparent bigger circle at the center
             Container(
               width: 25,
               height: 25,
@@ -104,6 +155,7 @@ class DiscImage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(100.0),
               ),
             ),
+            // dark smaller circle at the center
             Container(
               width: 18,
               height: 18,
@@ -115,6 +167,7 @@ class DiscImage extends StatelessWidget {
           ],
         ),
       ),
+      // this decoration is for the transparent-gradient border
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(200.0),
         gradient: LinearGradient(
