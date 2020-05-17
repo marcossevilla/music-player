@@ -13,12 +13,66 @@ class PlayerPage extends StatelessWidget {
       body: Column(
         children: [
           CustomAppBar(),
-          Row(
+          _DiscInfo(),
+        ],
+      ),
+    );
+  }
+}
+
+class _DiscInfo extends StatelessWidget {
+  const _DiscInfo({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          DiscImage(),
+          // TODO: Disc duration widget
+          DiscProgressBar()
+        ],
+      ),
+    );
+  }
+}
+
+class DiscProgressBar extends StatelessWidget {
+  const DiscProgressBar({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Text('2:50'),
+          SizedBox(height: 15.0),
+          Stack(
             children: [
-              DiscImage(),
-              // TODO: Disc duration widget
+              Container(
+                height: 180.0,
+                width: 2.0,
+                color: Colors.white.withOpacity(0.1),
+              ),
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  height: 80.0,
+                  width: 2.0,
+                  color: Colors.white.withOpacity(0.8),
+                ),
+              ),
             ],
           ),
+          SizedBox(height: 15.0),
+          Text('1:06'),
         ],
       ),
     );
