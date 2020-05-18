@@ -1,5 +1,4 @@
 List<String> getLyrics() {
-
   return [
     'I need it all downtown, nigga',
     'Put it back where you fuckin\' found it though',
@@ -62,5 +61,4 @@ List<String> getLyrics() {
     'Ridin\' on the roof with a dollar sign',
     'Attached to my head, head, head, head, head, head, head, head (woo, slow)',
   ];
-
 }

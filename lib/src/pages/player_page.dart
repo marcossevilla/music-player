@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../helpers/helpers.dart';
 import '../widgets/custom_app_bar.dart';
 
 class PlayerPage extends StatelessWidget {
@@ -10,14 +11,63 @@ class PlayerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          // page app bar
-          CustomAppBar(),
-          // disc image and song duration
-          _DiscInfo(),
-          // song title and artist + play/pause button
-          DiscTitle(),
+          _Background(),
+          Column(
+            children: <Widget>[
+              // gradient background
+              // page app bar
+              CustomAppBar(),
+              // disc image and song duration
+              _DiscInfo(),
+              // song title and artist + play/pause button
+              DiscTitle(),
+              // song lyrics
+              Expanded(child: Lyrics()),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Background extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.72,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(70.0)),
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.center,
+          colors: [Color(0xff33333e), Color(0xff201e28)],
+        ),
+      ),
+    );
+  }
+}
+
+class Lyrics extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final lyrics = getLyrics();
+
+    return Container(
+      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
+      child: ListWheelScrollView(
+        itemExtent: 40.0,
+        diameterRatio: 1.5,
+        children: [
+          for (String verse in lyrics)
+            Text(
+              verse,
+              style: Theme.of(context).textTheme.bodyText1,
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );
