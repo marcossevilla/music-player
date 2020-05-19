@@ -1,4 +1,9 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+
+import 'package:animate_do/animate_do.dart';
+import 'package:music_player_app/src/providers/player_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../helpers/helpers.dart';
 import '../widgets/custom_app_bar.dart';
@@ -38,7 +43,7 @@ class _Background extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: MediaQuery.of(context).size.height * 0.72,
+      height: MediaQuery.of(context).size.height * 0.65,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(70.0)),
         gradient: LinearGradient(
@@ -57,10 +62,11 @@ class Lyrics extends StatelessWidget {
     final lyrics = getLyrics();
 
     return Container(
-      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
+      margin: EdgeInsets.only(top: 60, left: 15.0, right: 15.0),
       child: ListWheelScrollView(
         itemExtent: 40.0,
         diameterRatio: 1.5,
+        physics: BouncingScrollPhysics(),
         children: [
           for (String verse in lyrics)
             Text(
@@ -95,15 +101,59 @@ class _DiscInfo extends StatelessWidget {
   }
 }
 
-class DiscTitle extends StatelessWidget {
+class DiscTitle extends StatefulWidget {
   const DiscTitle({
     Key key,
   }) : super(key: key);
 
   @override
+  _DiscTitleState createState() => _DiscTitleState();
+}
+
+class _DiscTitleState extends State<DiscTitle>
+    with SingleTickerProviderStateMixin {
+  bool _isPlaying = false;
+  bool _isFirstTime = true;
+  AnimationController _controller;
+
+  final audioPlayer = AssetsAudioPlayer();
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    this._controller.dispose();
+    super.dispose();
+  }
+
+  void open() {
+    final provider = Provider.of<PlayerProvider>(context, listen: false);
+
+    // open song
+    audioPlayer.open(Audio('assets/rental-brockhampton.mp3'));
+
+    // update current song time in real-time
+    audioPlayer.currentPosition.listen((duration) {
+      provider.currentSongTime = duration;
+    });
+
+    // assign the song's total duration
+    audioPlayer.current.listen((playingAudio) {
+      provider.songDuration = playingAudio.audio.duration;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 50),
+      margin: EdgeInsets.only(top: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -127,9 +177,35 @@ class DiscTitle extends StatelessWidget {
           ),
           // play button
           FloatingActionButton(
+            elevation: 0.0,
             backgroundColor: Theme.of(context).accentColor,
-            child: Icon(Icons.play_arrow),
-            onPressed: () {},
+            child: AnimatedIcon(
+              icon: AnimatedIcons.play_pause,
+              progress: _controller,
+            ),
+            onPressed: () {
+              final provider = Provider.of<PlayerProvider>(
+                context,
+                listen: false,
+              );
+
+              if (this._isPlaying) {
+                _controller.reverse();
+                this._isPlaying = false;
+                provider.controller.stop();
+              } else {
+                _controller.forward();
+                this._isPlaying = true;
+                provider.controller.repeat();
+              }
+
+              if (_isFirstTime) {
+                this.open();
+                _isFirstTime = false;
+              } else {
+                audioPlayer.playOrPause();
+              }
+            },
           ),
         ],
       ),
@@ -144,11 +220,14 @@ class DiscProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<PlayerProvider>(context);
+    final percentage = provider.percentage;
+
     return Container(
       child: Column(
         children: [
           // total song duration text
-          Text('2:50'),
+          Text(provider.songDurationStr),
           SizedBox(height: 15.0),
           Stack(
             children: [
@@ -162,7 +241,7 @@ class DiscProgressBar extends StatelessWidget {
               Positioned(
                 bottom: 0,
                 child: Container(
-                  height: 80.0,
+                  height: 180 * percentage,
                   width: 2.0,
                   color: Colors.white.withOpacity(0.8),
                 ),
@@ -171,7 +250,7 @@ class DiscProgressBar extends StatelessWidget {
           ),
           SizedBox(height: 15.0),
           // current song time text
-          Text('1:06'),
+          Text(provider.currentSongTimeStr),
         ],
       ),
     );
@@ -185,6 +264,8 @@ class DiscImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<PlayerProvider>(context);
+
     return Container(
       width: 250,
       height: 250,
@@ -195,7 +276,13 @@ class DiscImage extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             // actual album cover
-            Image.asset('assets/saturation.jpg'),
+            SpinPerfect(
+              // passing exposed controller to provider
+              animate: false,
+              duration: Duration(seconds: 10),
+              child: Image.asset('assets/saturation.jpg'),
+              controller: (controller) => provider.controller = controller,
+            ),
             // transparent bigger circle at the center
             Container(
               width: 25,
